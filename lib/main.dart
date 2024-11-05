@@ -15,7 +15,7 @@ void main() async {
 
   await initializeDateFormatting('pt_BR', null);
 
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
-      home: LoginScreen(), // Define LoginScreen como a tela inicial
+      home: const LoginScreen(), // Define LoginScreen como a tela inicial
       routes: {
         '/home': (context) => const MyHomePage(), // Rota para a tela principal
       },

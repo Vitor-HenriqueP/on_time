@@ -1,31 +1,35 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 //test
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Web Demo',
       initialRoute: '/comprove',
       routes: {
-        '/comprove': (context) => ComproveScreen(),
+        '/comprove': (context) => const ComproveScreen(),
       },
     );
   }
 }
 
 class ComproveScreen extends StatelessWidget {
+  const ComproveScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Olá, Vitor!'),
+        title: const Text('Olá, Vitor!'),
         actions: [
           IconButton(
-            icon: Icon(Icons.menu),
+            icon: const Icon(Icons.menu),
             onPressed: () {
               // Action for menu button
             },
@@ -37,18 +41,18 @@ class ComproveScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
+            const Text(
               'Comprovante de registro',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Container(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.grey[800],
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Column(
+              child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Nome: Vitor Henrique', style: TextStyle(color: Colors.white)),
@@ -58,15 +62,15 @@ class ComproveScreen extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: () {
                 // Action to download comprovante
               },
-              icon: Icon(Icons.download),
-              label: Text('Baixar comprovante'),
+              icon: const Icon(Icons.download),
+              label: const Text('Baixar comprovante'),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
@@ -75,7 +79,7 @@ class ComproveScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('Voltar'),
+              child: const Text('Voltar'),
             ),
           ],
         ),
