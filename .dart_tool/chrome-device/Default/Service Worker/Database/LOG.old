@@ -1,3 +1,9 @@
-2024/11/05-13:51:27.719 2918 Reusing MANIFEST C:\Users\Vinicius\AppData\Local\Temp\flutter_tools.64b7b674\flutter_tools_chrome_device.59230dbf\Default\Service Worker\Database/MANIFEST-000001
-2024/11/05-13:51:27.726 2918 Recovering log #3
-2024/11/05-13:51:27.726 2918 Reusing old log C:\Users\Vinicius\AppData\Local\Temp\flutter_tools.64b7b674\flutter_tools_chrome_device.59230dbf\Default\Service Worker\Database/000003.log 
+<<<<<<< HEAD
+2024/11/05-14:01:14.143 1708 Reusing MANIFEST C:\Users\Vinicius\AppData\Local\Temp\flutter_tools.8142aedd\flutter_tools_chrome_device.af4a46c1\Default\Service Worker\Database/MANIFEST-000001
+2024/11/05-14:01:14.146 1708 Recovering log #3
+2024/11/05-14:01:14.147 1708 Reusing old log C:\Users\Vinicius\AppData\Local\Temp\flutter_tools.8142aedd\flutter_tools_chrome_device.af4a46c1\Default\Service Worker\Database/000003.log 
+=======
+2024/11/05-11:12:05.204 2828 Reusing MANIFEST C:\Users\Vinicius\AppData\Local\Temp\flutter_tools.884a35c4\flutter_tools_chrome_device.88b76e68\Default\Service Worker\Database/MANIFEST-000001
+2024/11/05-11:12:05.215 2828 Recovering log #3
+2024/11/05-11:12:05.217 2828 Reusing old log C:\Users\Vinicius\AppData\Local\Temp\flutter_tools.884a35c4\flutter_tools_chrome_device.88b76e68\Default\Service Worker\Database/000003.log 
+>>>>>>> 524d01ae707b03a0e926d59b7ae53295ef7e29d8
