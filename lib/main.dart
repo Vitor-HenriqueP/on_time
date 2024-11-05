@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'login.dart'; // Importando a tela de login
 import 'home.dart'; // Importando a tela de home
@@ -15,7 +13,7 @@ void main() async {
 
   await initializeDateFormatting('pt_BR', null);
 
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -30,7 +28,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
-      home: LoginScreen(), // Define LoginScreen como a tela inicial
+      home: const LoginScreen(), // Define LoginScreen como a tela inicial
       routes: {
         '/home': (context) => const MyHomePage(), // Rota para a tela principal
       },
