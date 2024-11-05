@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_final/comprove.dart';
 import 'package:intl/intl.dart';
-// Importando a página Comprove
+import 'comprove.dart'; // Importando a página Comprove
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -140,7 +139,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 // Navegar para a página Comprove
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ComproveScreen()),
+                  MaterialPageRoute(builder: (context) =>  ComproveScreen()),
                 );
               },
               child: const Text(
