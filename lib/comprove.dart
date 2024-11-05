@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
-import 'package:flutter/foundation.dart' show kIsWeb; // Para verificar se está rodando na web
+import 'package:flutter/foundation.dart'
+    show kIsWeb; // Para verificar se está rodando na web
 import 'dart:html' as html; // Para download em web
 import 'package:cloud_firestore/cloud_firestore.dart'; // Importando o Firestore
 
@@ -51,7 +52,10 @@ class ComproveScreen extends StatelessWidget {
           children: [
             const Text(
               'Comprovante de registro',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+              style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white),
             ),
             const SizedBox(height: 16),
             Expanded(
@@ -79,8 +83,11 @@ class ComproveScreen extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final registro = registros[index];
                       final timestamp = registro['hora'] as Timestamp;
-                      final hora = DateFormat('HH:mm').format(timestamp.toDate());
-                      final dia = DateFormat('dd \'de\' MMMM \'de\' yyyy', 'pt_BR').format(timestamp.toDate());
+                      final hora =
+                          DateFormat('HH:mm').format(timestamp.toDate());
+                      final dia =
+                          DateFormat('dd \'de\' MMMM \'de\' yyyy', 'pt_BR')
+                              .format(timestamp.toDate());
 
                       return Container(
                         padding: const EdgeInsets.all(8),
@@ -92,8 +99,10 @@ class ComproveScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Horário: $hora', style: const TextStyle(color: Colors.white)),
-                            Text('Dia: $dia', style: const TextStyle(color: Colors.white)),
+                            Text('Horário: $hora',
+                                style: const TextStyle(color: Colors.white)),
+                            Text('Dia: $dia',
+                                style: const TextStyle(color: Colors.white)),
                           ],
                         ),
                       );
@@ -132,67 +141,73 @@ class ComproveScreen extends StatelessWidget {
     );
   }
 
- Future<void> _generateAndDownloadPDF() async {
-  // Recuperar todos os registros do Firestore
-  final querySnapshot = await FirebaseFirestore.instance
-      .collection('ponto')
-      .orderBy('hora', descending: true)
-      .get();
+  Future<void> _generateAndDownloadPDF() async {
+    // Recuperar todos os registros do Firestore
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('ponto')
+        .orderBy('hora', descending: true)
+        .get();
 
-  if (querySnapshot.docs.isNotEmpty) {
-    final pdf = pw.Document();
+    if (querySnapshot.docs.isNotEmpty) {
+      final pdf = pw.Document();
 
-    // Adiciona uma página ao PDF
-    pdf.addPage(
-      pw.Page(
-        build: (pw.Context context) {
-          final List<pw.Widget> content = [];
-          final nome = 'Vitor Henrique'; // Você pode substituir isso pela variável real, se necessário
-          final matricula = '123456789'; // Substitua isso pela matrícula real, se disponível
+      // Adiciona uma página ao PDF
+      pdf.addPage(
+        pw.Page(
+          build: (pw.Context context) {
+            final List<pw.Widget> content = [];
+            final nome =
+                'Vitor Henrique'; // Você pode substituir isso pela variável real, se necessário
+            final matricula =
+                '123456789'; // Substitua isso pela matrícula real, se disponível
 
-          content.add(pw.Text('Nome: $nome', style: pw.TextStyle(fontSize: 20)));
-          content.add(pw.Text('Matrícula: $matricula', style: pw.TextStyle(fontSize: 20)));
-          content.add(pw.SizedBox(height: 20));
+            content
+                .add(pw.Text('Nome: $nome', style: pw.TextStyle(fontSize: 20)));
+            content.add(pw.Text('Matrícula: $matricula',
+                style: pw.TextStyle(fontSize: 20)));
+            content.add(pw.SizedBox(height: 20));
 
-          // Adiciona cada registro ao PDF
-          for (final registro in querySnapshot.docs) {
-            final timestamp = registro['hora'] as Timestamp;
-            final hora = DateFormat('HH:mm:ss').format(timestamp.toDate());
-            final dia = DateFormat('dd \'de\' MMMM \'de\' yyyy', 'pt_BR').format(timestamp.toDate());
+            // Adiciona cada registro ao PDF
+            for (final registro in querySnapshot.docs) {
+              final timestamp = registro['hora'] as Timestamp;
+              final hora = DateFormat('HH:mm:ss').format(timestamp.toDate());
+              final dia = DateFormat('dd \'de\' MMMM \'de\' yyyy', 'pt_BR')
+                  .format(timestamp.toDate());
 
-            content.add(pw.Text('Horário: $hora'));
-            content.add(pw.Text('Dia: $dia'));
-            content.add(pw.SizedBox(height: 10)); // Espaçamento entre registros
-          }
+              content.add(pw.Text('Horário: $hora'));
+              content.add(pw.Text('Dia: $dia'));
+              content
+                  .add(pw.SizedBox(height: 10)); // Espaçamento entre registros
+            }
 
-          return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: content,
-          );
-        },
-      ),
-    );
+            return pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: content,
+            );
+          },
+        ),
+      );
 
-    if (kIsWeb) {
-      // Web: inicia o download
-      final bytes = await pdf.save();
-      final blob = html.Blob([bytes], 'application/pdf');
-      final url = html.Url.createObjectUrlFromBlob(blob);
-      final anchor = html.AnchorElement(href: url)
-        ..setAttribute('download', 'comprovante.pdf')
-        ..click();
-      html.Url.revokeObjectUrl(url);
+      if (kIsWeb) {
+        // Web: inicia o download
+        final bytes = await pdf.save();
+        final blob = html.Blob([bytes], 'application/pdf');
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        final anchor = html.AnchorElement(href: url)
+          ..setAttribute('download', 'comprovante.pdf')
+          ..click();
+        html.Url.revokeObjectUrl(url);
+      } else {
+        // Mobile/desktop: salva em um diretório temporário e abre o arquivo
+        final output = await getTemporaryDirectory();
+        final file = File("${output.path}/comprovante.pdf");
+        await file.writeAsBytes(await pdf.save());
+
+        // Exibir uma mensagem de confirmação
+        print('PDF salvo em ${file.path}');
+      }
     } else {
-      // Mobile/desktop: salva em um diretório temporário e abre o arquivo
-      final output = await getTemporaryDirectory();
-      final file = File("${output.path}/comprovante.pdf");
-      await file.writeAsBytes(await pdf.save());
-
-      // Exibir uma mensagem de confirmação
-      print('PDF salvo em ${file.path}');
+      print('Nenhum registro encontrado para gerar o PDF.');
     }
-  } else {
-    print('Nenhum registro encontrado para gerar o PDF.');
   }
-}
 }
