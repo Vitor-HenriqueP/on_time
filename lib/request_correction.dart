@@ -17,6 +17,16 @@ class _CorrectionScreenState extends State<CorrectionScreen> {
   bool isLoading = false;
   final String staticMatricula = '12345678'; // Matrícula estática
 
+  @override
+  void initState() {
+    super.initState();
+    // Define o e-mail do usuário no controlador de texto ao iniciar a tela
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      emailController.text = user.email ?? ''; // Obtém o e-mail do usuário
+    }
+  }
+
   Future<void> submitCorrection() async {
     setState(() {
       isLoading = true;
@@ -40,7 +50,6 @@ class _CorrectionScreenState extends State<CorrectionScreen> {
         );
         
         // Limpar os campos após o envio
-        emailController.clear();
         reasonController.clear();
         setState(() {
           selectedDate = DateTime.now();
@@ -107,14 +116,16 @@ class _CorrectionScreenState extends State<CorrectionScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              TextField(
-                controller: emailController,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
+              // Estilo para o campo de e-mail igual ao campo de matrícula
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF555555),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: Text(
+                  emailController.text, // Exibe o e-mail estático
+                  style: const TextStyle(color: Colors.white),
                 ),
               ),
               const SizedBox(height: 16),
@@ -126,6 +137,7 @@ class _CorrectionScreenState extends State<CorrectionScreen> {
                 ),
               ),
               const SizedBox(height: 8),
+              // Estilo do campo de matrícula
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
                 decoration: BoxDecoration(

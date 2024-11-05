@@ -6,6 +6,18 @@ import 'package:intl/intl.dart';
 class MyRequestsScreen extends StatelessWidget {
   const MyRequestsScreen({super.key});
 
+  // Função para excluir a solicitação do Firestore
+  Future<void> _deleteRequest(String requestId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('corrections')
+          .doc(requestId)
+          .delete();
+    } catch (e) {
+      print('Erro ao excluir solicitação: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,6 +74,32 @@ class MyRequestsScreen extends StatelessWidget {
                   style: const TextStyle(color: Color(0xFFF4F4F4)),
                 ),
                 leading: const Icon(Icons.access_time, color: Color(0xFFFF8A50)),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete, color: Color(0xFFFF8A50)),
+                  onPressed: () {
+                    // Confirma a exclusão antes de proceder
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Excluir Solicitação'),
+                        content: const Text('Você tem certeza que deseja excluir esta solicitação?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('Cancelar'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              _deleteRequest(request.id);  // Exclui a solicitação
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('Excluir'),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               );
             },
           );

@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'comprove.dart';
+import 'login.dart';
 import 'request_correction.dart';
 import 'requests_screens.dart';
 
@@ -77,7 +78,8 @@ class _MyHomePageState extends State<MyHomePage> {
               return IconButton(
                 icon: const Icon(Icons.menu, color: Color(0xFFFF8A50)),
                 onPressed: () {
-                  Scaffold.of(context).openEndDrawer();
+                  Scaffold.of(context)
+                      .openEndDrawer(); // Abre o menu corretamente
                 },
               );
             },
@@ -85,59 +87,88 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
       endDrawer: Drawer(
-  backgroundColor: const Color(0xFF433D3D),
-  child: ListView(
-    padding: EdgeInsets.zero,
-    children: [
-      DrawerHeader(
-        decoration: const BoxDecoration(color: Color(0xFF433D3D)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        backgroundColor: const Color(0xFF433D3D),
+        child: ListView(
+          padding: EdgeInsets.zero,
           children: [
-            const CircleAvatar(
-              backgroundColor: Color(0xFFFF8A50),
-              radius: 24,
-              child: Icon(Icons.close, color: Colors.white),
+            DrawerHeader(
+              decoration: const BoxDecoration(color: Color(0xFF433D3D)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context)
+                          .pop(); // Fecha o menu ao clicar no X
+                    },
+                    child: const CircleAvatar(
+                      backgroundColor: Color(0xFFFF8A50),
+                      radius: 24,
+                      child: Icon(Icons.close, color: Colors.white),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
             ),
-            const SizedBox(height: 16),
-            Image.asset(
-              'assets/img/logo-ontime.png',
-              height: 50,
+            ListTile(
+              title: const Text('Consultar Histórico',
+                  style: TextStyle(color: Color(0xFFF4F4F4))),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ComproveScreen()),
+                );
+              },
             ),
+            ListTile(
+              title: const Text('Solicitar Correção',
+                  style: TextStyle(color: Color(0xFFF4F4F4))),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => CorrectionScreen()),
+                );
+              },
+            ),
+            if (hasRequests) // Condição para exibir "Minhas Solicitações"
+              ListTile(
+                title: const Text('Minhas Solicitações',
+                    style: TextStyle(color: Color(0xFFF4F4F4))),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const MyRequestsScreen()),
+                  );
+                },
+              ),
+            ListTile(
+              title: const Text('Logout',
+                  style: TextStyle(color: Color(0xFFF4F4F4))),
+              leading: const Icon(Icons.exit_to_app, color: Color(0xFFFF8A50)),
+              onTap: () async {
+                try {
+                  await FirebaseAuth.instance.signOut(); // Realiza o logout
+                  Navigator.of(context).pop(); // Fecha o menu
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            LoginScreen()), // Redireciona para o login
+                  );
+                } catch (e) {
+                  print(
+                      'Erro ao fazer logout: $e'); // Exibe o erro, caso algo tenha dado errado
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Erro ao realizar logout')),
+                  );
+                }
+              },
+            )
           ],
         ),
       ),
-      ListTile(
-        title: const Text('Consultar Histórico', style: TextStyle(color: Color(0xFFF4F4F4))),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => ComproveScreen()),
-          );
-        },
-      ),
-      ListTile(
-        title: const Text('Solicitar Correção', style: TextStyle(color: Color(0xFFF4F4F4))),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => CorrectionScreen()),
-          );
-        },
-      ),
-      if (hasRequests) // Condição para exibir "Minhas Solicitações"
-        ListTile(
-          title: const Text('Minhas Solicitações', style: TextStyle(color: Color(0xFFF4F4F4))),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const MyRequestsScreen()),
-            );
-          },
-        ),
-    ],
-  ),
-),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -236,6 +267,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   }
+
                   if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                     return const Center(
                       child: Text(
@@ -244,6 +276,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                     );
                   }
+
                   final registros = snapshot.data!.docs;
                   return ListView.builder(
                     itemCount: registros.length,
@@ -256,23 +289,37 @@ class _MyHomePageState extends State<MyHomePage> {
                           DateFormat('dd \'de\' MMMM \'de\' yyyy', 'pt_BR')
                               .format(timestamp.toDate());
 
-                      return ListTile(
-                        leading: const Icon(Icons.access_time,
-                            color: Color(0xFFFF8A50)),
-                        title: Text(
-                          hora,
-                          style: const TextStyle(color: Color(0xFFF4F4F4)),
-                        ),
-                        subtitle: Text(
-                          dia,
-                          style: const TextStyle(color: Color(0xFFF4F4F4)),
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Card(
+                          color: const Color(0xFF433D3D),
+                          child: ListTile(
+                            leading: const Icon(
+                              Icons.access_time,
+                              color: Color(0xFFFF8A50),
+                            ),
+                            title: Center(
+                              child: Text(
+                                hora,
+                                style:
+                                    const TextStyle(color: Color(0xFFF4F4F4)),
+                              ),
+                            ),
+                            subtitle: Center(
+                              child: Text(
+                                dia,
+                                style:
+                                    const TextStyle(color: Color(0xFFF4F4F4)),
+                              ),
+                            ),
+                          ),
                         ),
                       );
                     },
                   );
                 },
               ),
-            ),
+            )
           ],
         ),
       ),
