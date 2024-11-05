@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
-import 'comprove.dart'; // Importando a página Comprove
+import 'comprove.dart';
+import 'request_correction.dart';
+import 'requests_screens.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -12,16 +14,17 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-    String? userEmail;
+  String? userEmail;
+  bool hasRequests = false;
 
   @override
   void initState() {
     super.initState();
     _loadUserEmail();
+    _checkUserRequests();
   }
 
   Future<void> _loadUserEmail() async {
-    // Obtendo o e-mail do usuário autenticado no Firebase
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       setState(() {
@@ -30,7 +33,21 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  // Função que cria um Stream de data/hora atualizada a cada segundo
+  Future<void> _checkUserRequests() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('corrections')
+          .where('email', isEqualTo: user.email)
+          .limit(1) // Limitando a 1 para otimizar a consulta
+          .get();
+
+      setState(() {
+        hasRequests = querySnapshot.docs.isNotEmpty;
+      });
+    }
+  }
+
   Stream<String> getTimeStream() async* {
     while (true) {
       await Future.delayed(const Duration(seconds: 1));
@@ -55,26 +72,82 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.menu, color: Color(0xFFFF8A50)),
-            onPressed: () {
-              // Ação para abrir o menu
+          Builder(
+            builder: (context) {
+              return IconButton(
+                icon: const Icon(Icons.menu, color: Color(0xFFFF8A50)),
+                onPressed: () {
+                  Scaffold.of(context).openEndDrawer();
+                },
+              );
             },
           ),
         ],
       ),
+      endDrawer: Drawer(
+  backgroundColor: const Color(0xFF433D3D),
+  child: ListView(
+    padding: EdgeInsets.zero,
+    children: [
+      DrawerHeader(
+        decoration: const BoxDecoration(color: Color(0xFF433D3D)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const CircleAvatar(
+              backgroundColor: Color(0xFFFF8A50),
+              radius: 24,
+              child: Icon(Icons.close, color: Colors.white),
+            ),
+            const SizedBox(height: 16),
+            Image.asset(
+              'assets/img/logo-ontime.png',
+              height: 50,
+            ),
+          ],
+        ),
+      ),
+      ListTile(
+        title: const Text('Consultar Histórico', style: TextStyle(color: Color(0xFFF4F4F4))),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ComproveScreen()),
+          );
+        },
+      ),
+      ListTile(
+        title: const Text('Solicitar Correção', style: TextStyle(color: Color(0xFFF4F4F4))),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => CorrectionScreen()),
+          );
+        },
+      ),
+      if (hasRequests) // Condição para exibir "Minhas Solicitações"
+        ListTile(
+          title: const Text('Minhas Solicitações', style: TextStyle(color: Color(0xFFF4F4F4))),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const MyRequestsScreen()),
+            );
+          },
+        ),
+    ],
+  ),
+),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Logo do aplicativo
             Image.asset(
               'assets/img/logo-ontime.png',
               height: 100,
             ),
             const SizedBox(height: 20),
-            // Exibindo a hora atual em tempo real
             Center(
               child: Column(
                 children: [
@@ -101,7 +174,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    DateFormat('dd \'de\' MMMM \'de\' yyyy', 'pt_BR').format(DateTime.now()),
+                    DateFormat('dd \'de\' MMMM \'de\' yyyy', 'pt_BR')
+                        .format(DateTime.now()),
                     style: const TextStyle(
                       fontSize: 20,
                       color: Color(0xFFF4F4F4),
@@ -111,14 +185,13 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             const SizedBox(height: 20),
-            // Botão de registro
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFFF8A50),
-                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
               ),
               onPressed: () async {
-                // Função para registrar horário
                 await FirebaseFirestore.instance.collection('ponto').add({
                   'hora': Timestamp.now(),
                 });
@@ -129,17 +202,16 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             const SizedBox(height: 20),
-            // Botão para ir para Comprove
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFFF8A50),
-                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
               ),
               onPressed: () {
-                // Navegar para a página Comprove
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) =>  ComproveScreen()),
+                  MaterialPageRoute(builder: (context) => ComproveScreen()),
                 );
               },
               child: const Text(
@@ -148,7 +220,6 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             const SizedBox(height: 20),
-            // Lista dos últimos registros
             const Text(
               'Últimos registros',
               style: TextStyle(fontSize: 20, color: Color(0xFFF4F4F4)),
@@ -179,11 +250,15 @@ class _MyHomePageState extends State<MyHomePage> {
                     itemBuilder: (context, index) {
                       final registro = registros[index];
                       final timestamp = registro['hora'] as Timestamp;
-                      final hora = DateFormat('HH:mm').format(timestamp.toDate());
-                      final dia = DateFormat('dd \'de\' MMMM \'de\' yyyy', 'pt_BR').format(timestamp.toDate());
+                      final hora =
+                          DateFormat('HH:mm').format(timestamp.toDate());
+                      final dia =
+                          DateFormat('dd \'de\' MMMM \'de\' yyyy', 'pt_BR')
+                              .format(timestamp.toDate());
 
                       return ListTile(
-                        leading: const Icon(Icons.access_time, color: Color(0xFFFF8A50)),
+                        leading: const Icon(Icons.access_time,
+                            color: Color(0xFFFF8A50)),
                         title: Text(
                           hora,
                           style: const TextStyle(color: Color(0xFFF4F4F4)),
