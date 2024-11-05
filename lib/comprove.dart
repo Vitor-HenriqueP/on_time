@@ -178,7 +178,7 @@ class ComproveScreen extends StatelessWidget {
       final bytes = await pdf.save();
       final blob = html.Blob([bytes], 'application/pdf');
       final url = html.Url.createObjectUrlFromBlob(blob);
-      final anchor = html.AnchorElement(href: ur
+      final anchor = html.AnchorElement(href: url)
         ..setAttribute('download', 'comprovante.pdf')
         ..click();
       html.Url.revokeObjectUrl(url);
