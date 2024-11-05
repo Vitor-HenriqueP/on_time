@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_final/DetalheRegistroScreen.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
@@ -96,13 +97,31 @@ class ComproveScreen extends StatelessWidget {
                           color: Colors.grey[800],
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Horário: $hora',
-                                style: const TextStyle(color: Colors.white)),
-                            Text('Dia: $dia',
-                                style: const TextStyle(color: Colors.white)),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Horário: $hora',
+                                    style: const TextStyle(color: Colors.white)),
+                                Text('Dia: $dia',
+                                    style: const TextStyle(color: Colors.white)),
+                              ],
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.arrow_forward,
+                                  color: Colors.orange),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        DetalheRegistroScreen(hora: hora, dia: dia),
+                                  ),
+                                );
+                              },
+                            ),
                           ],
                         ),
                       );
@@ -142,7 +161,6 @@ class ComproveScreen extends StatelessWidget {
   }
 
   Future<void> _generateAndDownloadPDF() async {
-    // Recuperar todos os registros do Firestore
     final querySnapshot = await FirebaseFirestore.instance
         .collection('ponto')
         .orderBy('hora', descending: true)
@@ -151,23 +169,18 @@ class ComproveScreen extends StatelessWidget {
     if (querySnapshot.docs.isNotEmpty) {
       final pdf = pw.Document();
 
-      // Adiciona uma página ao PDF
       pdf.addPage(
         pw.Page(
           build: (pw.Context context) {
             final List<pw.Widget> content = [];
-            final nome =
-                'Vitor Henrique'; // Você pode substituir isso pela variável real, se necessário
-            final matricula =
-                '123456789'; // Substitua isso pela matrícula real, se disponível
+            final nome = 'Vitor Henrique';
+            final matricula = '123456789';
 
-            content
-                .add(pw.Text('Nome: $nome', style: pw.TextStyle(fontSize: 20)));
+            content.add(pw.Text('Nome: $nome', style: pw.TextStyle(fontSize: 20)));
             content.add(pw.Text('Matrícula: $matricula',
                 style: pw.TextStyle(fontSize: 20)));
             content.add(pw.SizedBox(height: 20));
 
-            // Adiciona cada registro ao PDF
             for (final registro in querySnapshot.docs) {
               final timestamp = registro['hora'] as Timestamp;
               final hora = DateFormat('HH:mm:ss').format(timestamp.toDate());
@@ -176,8 +189,7 @@ class ComproveScreen extends StatelessWidget {
 
               content.add(pw.Text('Horário: $hora'));
               content.add(pw.Text('Dia: $dia'));
-              content
-                  .add(pw.SizedBox(height: 10)); // Espaçamento entre registros
+              content.add(pw.SizedBox(height: 10));
             }
 
             return pw.Column(
@@ -189,7 +201,6 @@ class ComproveScreen extends StatelessWidget {
       );
 
       if (kIsWeb) {
-        // Web: inicia o download
         final bytes = await pdf.save();
         final blob = html.Blob([bytes], 'application/pdf');
         final url = html.Url.createObjectUrlFromBlob(blob);
@@ -198,12 +209,10 @@ class ComproveScreen extends StatelessWidget {
           ..click();
         html.Url.revokeObjectUrl(url);
       } else {
-        // Mobile/desktop: salva em um diretório temporário e abre o arquivo
         final output = await getTemporaryDirectory();
         final file = File("${output.path}/comprovante.pdf");
         await file.writeAsBytes(await pdf.save());
 
-        // Exibir uma mensagem de confirmação
         print('PDF salvo em ${file.path}');
       }
     } else {
