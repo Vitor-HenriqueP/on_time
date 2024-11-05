@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'comprove.dart'; // Importando a página Comprove
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -125,6 +126,25 @@ class _MyHomePageState extends State<MyHomePage> {
               },
               child: const Text(
                 'Registrar',
+                style: TextStyle(color: Color(0xFFF4F4F4), fontSize: 18),
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Botão para ir para Comprove
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFF8A50),
+                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+              ),
+              onPressed: () {
+                // Navegar para a página Comprove
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ComprovePage()),
+                );
+              },
+              child: const Text(
+                'Ir para Comprove',
                 style: TextStyle(color: Color(0xFFF4F4F4), fontSize: 18),
               ),
             ),
