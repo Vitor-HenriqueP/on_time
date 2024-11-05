@@ -72,7 +72,7 @@ class DetalheRegistroScreen extends StatelessWidget {
               pw.Text('Detalhe do Registro', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
               pw.SizedBox(height: 20),
               pw.Text('Horário: $hora', style: pw.TextStyle(fontSize: 18)),
-              pw.Text('Dia: $dia', style: pw.TextStyle(fontSize: 18)),
+              pw.Text('Dia: $dia', style: pw.TextStyle(fontSize: 18)),//
             ],
           );
         },
