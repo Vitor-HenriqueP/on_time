@@ -143,7 +143,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 );
               },
               child: const Text(
-                'Ir para Comprove',
+                'Meus comprovantes',
                 style: TextStyle(color: Color(0xFFF4F4F4), fontSize: 18),
               ),
             ),
