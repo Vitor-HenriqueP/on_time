@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_final/DetalheRegistroScreen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
@@ -173,10 +174,11 @@ class ComproveScreen extends StatelessWidget {
         pw.Page(
           build: (pw.Context context) {
             final List<pw.Widget> content = [];
-            final nome = 'Vitor Henrique';
-            final matricula = '123456789';
+            final user = FirebaseAuth.instance.currentUser;
+            final email = user?.email;
+            final matricula = user?.uid;
 
-            content.add(pw.Text('Nome: $nome', style: pw.TextStyle(fontSize: 20)));
+            content.add(pw.Text('Email: $email', style: pw.TextStyle(fontSize: 20)));
             content.add(pw.Text('Matrícula: $matricula',
                 style: pw.TextStyle(fontSize: 20)));
             content.add(pw.SizedBox(height: 20));
