@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -10,12 +11,10 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController matriculaController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool isLoading = false;
   String? errorMessage;
-  bool isEmailLogin = false; // Controle do switch entre Email e Matrícula
 
   // Função para fazer login com email e senha
   Future<void> signInWithEmail() async {
@@ -25,11 +24,19 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
-      Navigator.pushReplacementNamed(context, '/home');
+
+      // Verificar se a senha é a padrão (12345678)
+      if (passwordController.text.trim() == '12345678') {
+        // Mostrar popup de redefinir senha
+        _showResetPasswordDialog();
+      } else {
+        // Usuário autenticado com sucesso
+        Navigator.pushReplacementNamed(context, '/home');
+      }
     } catch (e) {
       setState(() {
         errorMessage = 'Erro ao fazer login com email e senha. Verifique suas credenciais.';
@@ -41,49 +48,63 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // Função para fazer login com matrícula
-  Future<void> signInWithMatricula() async {
-    setState(() {
-      isLoading = true;
-      errorMessage = null;
-    });
+  // Função para exibir o popup de redefinir senha
+  void _showResetPasswordDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Redefinir Senha'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('No primeiro acesso, você precisa redefinir sua senha.'),
+              const SizedBox(height: 16),
+              TextField(
+                controller: passwordController,
+                decoration: const InputDecoration(labelText: 'Nova Senha'),
+                obscureText: true,
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () async {
+                // Atualiza a senha do usuário no Firebase
+                try {
+                  User? user = FirebaseAuth.instance.currentUser;
+                  if (user != null) {
+                    await user.updatePassword(passwordController.text.trim());
+                    Navigator.of(context).pop(); // Fecha o popup
+                    Navigator.pushReplacementNamed(context, '/home'); // Redireciona para a tela inicial
+                  }
+                } catch (e) {
+                  print('Erro ao redefinir a senha: $e');
+                }
+              },
+              child: const Text('Redefinir'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
-    String matricula = matriculaController.text.trim();
+  // Função para verificar a sessão do usuário ao iniciar o app
+  Future<void> checkUserSession() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('user_id');
 
-    if (matricula.isEmpty) {
-      setState(() {
-        errorMessage = 'Por favor, insira a matrícula';
-      });
-      setState(() {
-        isLoading = false;
-      });
-      return;
+    if (userId != null) {
+      // Usuário está logado, redireciona para a tela inicial
+      Navigator.pushReplacementNamed(context, '/home');
     }
+  }
 
-    try {
-      // Verificar se a matrícula existe no Firestore
-      QuerySnapshot snapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .where('matricula', isEqualTo: matricula)
-          .get();
-
-      if (snapshot.docs.isEmpty) {
-        setState(() {
-          errorMessage = 'Matrícula não encontrada';
-        });
-      } else {
-        // Login bem-sucedido com matrícula
-        Navigator.pushReplacementNamed(context, '/home');
-      }
-    } catch (e) {
-      setState(() {
-        errorMessage = 'Erro ao fazer login com matrícula. Tente novamente mais tarde.';
-      });
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
+  @override
+  void initState() {
+    super.initState();
+    checkUserSession(); // Verifica a sessão do usuário ao iniciar
   }
 
   @override
@@ -111,109 +132,55 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 32),
 
-              // Row para o switch e o texto "Login com Email"
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  const Text(
-                    'Login com Email',
-                    style: TextStyle(
-                      color: Color(0xFFF4F4F4),
-                      fontSize: 16,
-                    ),
+              // Campo de E-mail
+              Align(
+                alignment: Alignment.centerLeft,
+                child: const Text(
+                  'E-mail',
+                  style: TextStyle(
+                    color: Color(0xFFF4F4F4),
+                    fontSize: 16,
                   ),
-                  Switch(
-                    value: isEmailLogin, // Usando isEmailLogin para controlar a lógica
-                    onChanged: (value) {
-                      setState(() {
-                        isEmailLogin = value; // Quando o switch estiver ativo, será login por email
-                      });
-                    },
-                    activeColor: const Color(0xFFFF8A50),
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: emailController,
+                style: const TextStyle(color: Colors.black),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
                   ),
-                ],
+                ),
+                keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 16),
-
-              // Mostrar campo de e-mail e senha se o switch estiver ativado (login com email)
-              if (isEmailLogin) ...[ // Login com email
-                // Campo de E-mail
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: const Text(
-                    'E-mail',
-                    style: TextStyle(
-                      color: Color(0xFFF4F4F4),
-                      fontSize: 16,
-                    ),
+              // Campo de Senha
+              Align(
+                alignment: Alignment.centerLeft,
+                child: const Text(
+                  'Senha',
+                  style: TextStyle(
+                    color: Color(0xFFF4F4F4),
+                    fontSize: 16,
                   ),
                 ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: emailController,
-                  style: const TextStyle(color: Colors.black),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                  ),
-                  keyboardType: TextInputType.emailAddress,
-                ),
-                const SizedBox(height: 16),
-                // Campo de Senha
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: const Text(
-                    'Senha',
-                    style: TextStyle(
-                      color: Color(0xFFF4F4F4),
-                      fontSize: 16,
-                    ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: passwordController,
+                style: const TextStyle(color: Colors.black),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
                   ),
                 ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: passwordController,
-                  style: const TextStyle(color: Colors.black),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                  ),
-                  obscureText: true,
-                ),
-              ],
-              // Caso contrário, mostrar campos de matrícula (login com matrícula)
-              if (!isEmailLogin) ...[ // Login com matrícula
-                // Campo de Matrícula
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: const Text(
-                    'Matrícula',
-                    style: TextStyle(
-                      color: Color(0xFFF4F4F4),
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: matriculaController,
-                  style: const TextStyle(color: Colors.black),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                  ),
-                  keyboardType: TextInputType.number,
-                ),
-              ],
+                obscureText: true,
+              ),
               const SizedBox(height: 16),
               if (errorMessage != null)
                 Text(
@@ -225,49 +192,22 @@ class _LoginScreenState extends State<LoginScreen> {
                   ? const CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFF8A50)),
                     )
-                  : Column(
-                      children: [
-                        // Botão de login com matrícula
-                        if (!isEmailLogin) ...[
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFFF8A50),
-                              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                            ),
-                            onPressed: signInWithMatricula,
-                            child: const Text(
-                              'ENTRAR COM MATRÍCULA',
-                              style: TextStyle(
-                                color: Color(0xFFF4F4F4),
-                                fontSize: 18,
-                              ),
-                            ),
-                          ),
-                        ],
-                        // Botão de login com email e senha
-                        if (isEmailLogin) ...[
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFFF8A50),
-                              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                            ),
-                            onPressed: signInWithEmail,
-                            child: const Text(
-                              'ENTRAR COM E-MAIL',
-                              style: TextStyle(
-                                color: Color(0xFFF4F4F4),
-                                fontSize: 18,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
+                  : ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFF8A50),
+                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                      ),
+                      onPressed: signInWithEmail,
+                      child: const Text(
+                        'ENTRAR COM E-MAIL',
+                        style: TextStyle(
+                          color: Color(0xFFF4F4F4),
+                          fontSize: 18,
+                        ),
+                      ),
                     ),
             ],
           ),

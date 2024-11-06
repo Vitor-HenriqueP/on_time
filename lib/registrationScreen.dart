@@ -1,5 +1,6 @@
 import 'dart:math'; // Importando o pacote para gerar números aleatórios
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -26,6 +27,7 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final _cpfController = TextEditingController();
   final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
 
   // Função para gerar matrícula com 9 dígitos numéricos
   String generateMatricula() {
@@ -34,17 +36,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return matricula.toString();
   }
 
-  // Função para registrar o usuário no Firestore
+  // Função para registrar o usuário no Firestore e Firebase Authentication
   Future<void> registerUser() async {
     String cpf = _cpfController.text.trim();
     String name = _nameController.text.trim();
+    String email = _emailController.text.trim();
 
-    if (cpf.isEmpty || name.isEmpty) {
+    if (cpf.isEmpty || name.isEmpty || email.isEmpty) {
       // Exibir mensagem de erro se algum campo estiver vazio
       return;
     }
 
     try {
+      // Criar usuário no Firebase Authentication com email e senha padrão
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+        email: email,
+        password: '12345678', // Senha padrão
+      );
+
       // Gerar matrícula automática com 9 dígitos
       String matricula = generateMatricula();
 
@@ -52,7 +62,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
       await FirebaseFirestore.instance.collection('users').add({
         'cpf': cpf,
         'name': name,
+        'email': email,
         'matricula': matricula,
+        'uid': userCredential.user?.uid, // Armazenar o UID do usuário
       });
 
       // Exibir mensagem de sucesso
@@ -61,9 +73,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
       // Limpar os campos após o registro
       _cpfController.clear();
       _nameController.clear();
+      _emailController.clear();
     } catch (e) {
       // Exibir erro em caso de falha
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao registrar usuário: $e')));
+    }
+  }
+
+  // Função para excluir o usuário do Firestore
+  Future<void> deleteUser(String userId) async {
+    try {
+      // Excluir o usuário do Firestore
+      await FirebaseFirestore.instance.collection('users').doc(userId).delete();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Usuário excluído com sucesso!')));
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao excluir usuário: $e')));
     }
   }
 
@@ -107,6 +131,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               style: TextStyle(color: Colors.white), // Cor do texto do campo
             ),
+            SizedBox(height: 10),
+            // Campo de Email
+            TextField(
+              controller: _emailController,
+              decoration: InputDecoration(
+                labelText: 'Email',
+                labelStyle: TextStyle(color: Color(0xFFFF8A50)), // Cor do texto da label
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.emailAddress,
+              style: TextStyle(color: Colors.white), // Cor do texto do campo
+            ),
             SizedBox(height: 20),
             // Botão de Registro
             ElevatedButton(
@@ -140,8 +176,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       var user = users[index];
                       return ListTile(
                         title: Text(user['name'], style: TextStyle(color: Colors.white)), // Cor do nome do usuário
-                        subtitle: Text('CPF: ${user['cpf']}', style: TextStyle(color: Colors.white)), // Cor do CPF
-                        trailing: Text('Matrícula: ${user['matricula']}', style: TextStyle(color: Colors.white)), // Cor da matrícula
+                        subtitle: Text('CPF: ${user['cpf']}\nEmail: ${user['email']}', style: TextStyle(color: Colors.white)), // Cor do CPF e e-mail
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('Matrícula: ${user['matricula']}', style: TextStyle(color: Colors.white)), // Cor da matrícula
+                            IconButton(
+                              icon: Icon(Icons.delete, color: Colors.white), // Ícone de exclusão
+                              onPressed: () => deleteUser(user.id), // Função de exclusão
+                            ),
+                          ],
+                        ),
                       );
                     },
                   );

@@ -66,12 +66,6 @@ class _MyHomePageState extends State<MyHomePage> {
         elevation: 0,
         leading: Padding(
           padding: const EdgeInsets.only(left: 16.0),
-          child: Center(
-            child: Text(
-              'Olá, ${userEmail ?? 'Usuário'}',
-              style: const TextStyle(color: Color(0xFFF4F4F4), fontSize: 16),
-            ),
-          ),
         ),
         actions: [
           Builder(
@@ -88,98 +82,97 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
       endDrawer: Drawer(
-  backgroundColor: const Color(0xFF433D3D),
-  child: ListView(
-    padding: EdgeInsets.zero,
-    children: [
-      DrawerHeader(
-        decoration: const BoxDecoration(color: Color(0xFF433D3D)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        backgroundColor: const Color(0xFF433D3D),
+        child: ListView(
+          padding: EdgeInsets.zero,
           children: [
-            GestureDetector(
-              onTap: () {
-                Navigator.of(context)
-                    .pop(); // Fecha o menu ao clicar no X
-              },
-              child: const CircleAvatar(
-                backgroundColor: Color(0xFFFF8A50),
-                radius: 24,
-                child: Icon(Icons.close, color: Colors.white),
+            DrawerHeader(
+              decoration: const BoxDecoration(color: Color(0xFF433D3D)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context)
+                          .pop(); // Fecha o menu ao clicar no X
+                    },
+                    child: const CircleAvatar(
+                      backgroundColor: Color(0xFFFF8A50),
+                      radius: 24,
+                      child: Icon(Icons.close, color: Colors.white),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
+            ListTile(
+              title: const Text(
+                'Cadastrar Usuário',
+                style: TextStyle(color: Color(0xFFF4F4F4)),
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => RegisterScreen()),
+                );
+              },
+            ),
+            ListTile(
+              title: const Text('Consultar Histórico',
+                  style: TextStyle(color: Color(0xFFF4F4F4))),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ComproveScreen()),
+                );
+              },
+            ),
+            ListTile(
+              title: const Text('Solicitar Correção',
+                  style: TextStyle(color: Color(0xFFF4F4F4))),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => CorrectionScreen()),
+                );
+              },
+            ),
+            if (hasRequests) // Condição para exibir "Minhas Solicitações"
+              ListTile(
+                title: const Text('Minhas Solicitações',
+                    style: TextStyle(color: Color(0xFFF4F4F4))),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const MyRequestsScreen()),
+                  );
+                },
+              ),
+            ListTile(
+              title: const Text('Logout',
+                  style: TextStyle(color: Color(0xFFF4F4F4))),
+              leading: const Icon(Icons.exit_to_app, color: Color(0xFFFF8A50)),
+              onTap: () async {
+                try {
+                  await FirebaseAuth.instance.signOut(); // Realiza o logout
+                  Navigator.of(context).pop(); // Fecha o menu
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginScreen()),
+                  );
+                } catch (e) {
+                  print('Erro ao fazer logout: $e');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Erro ao realizar logout')),
+                  );
+                }
+              },
+            ),
           ],
         ),
       ),
-      ListTile(
-        title: const Text(
-          'Cadastrar Usuário',
-          style: TextStyle(color: Color(0xFFF4F4F4)),
-        ),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => RegisterScreen()),
-          );
-        },
-      ),
-      ListTile(
-        title: const Text('Consultar Histórico',
-            style: TextStyle(color: Color(0xFFF4F4F4))),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => ComproveScreen()),
-          );
-        },
-      ),
-      ListTile(
-        title: const Text('Solicitar Correção',
-            style: TextStyle(color: Color(0xFFF4F4F4))),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => CorrectionScreen()),
-          );
-        },
-      ),
-      if (hasRequests) // Condição para exibir "Minhas Solicitações"
-        ListTile(
-          title: const Text('Minhas Solicitações',
-              style: TextStyle(color: Color(0xFFF4F4F4))),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => const MyRequestsScreen()),
-            );
-          },
-        ),
-      ListTile(
-        title: const Text('Logout',
-            style: TextStyle(color: Color(0xFFF4F4F4))),
-        leading: const Icon(Icons.exit_to_app, color: Color(0xFFFF8A50)),
-        onTap: () async {
-          try {
-            await FirebaseAuth.instance.signOut(); // Realiza o logout
-            Navigator.of(context).pop(); // Fecha o menu
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => LoginScreen()),
-            );
-          } catch (e) {
-            print('Erro ao fazer logout: $e');
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Erro ao realizar logout')),
-            );
-          }
-        },
-      ),
-    ],
-  ),
-),
-
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -227,22 +220,26 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF8A50),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-              ),
-              onPressed: () async {
-                await FirebaseFirestore.instance.collection('ponto').add({
-                  'hora': Timestamp.now(),
-                });
-              },
-              child: const Text(
-                'Registrar',
-                style: TextStyle(color: Color(0xFFF4F4F4), fontSize: 18),
-              ),
-            ),
+        ElevatedButton(
+  style: ElevatedButton.styleFrom(
+    backgroundColor: const Color(0xFFFF8A50),
+    padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+  ),
+  onPressed: () async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await FirebaseFirestore.instance.collection('ponto').add({
+        'hora': Timestamp.now(),
+        'email': user.email, // Salva o email do usuário no registro de ponto
+      });
+    }
+  },
+  child: const Text(
+    'Registrar',
+    style: TextStyle(color: Color(0xFFF4F4F4), fontSize: 18),
+  ),
+),
+
             const SizedBox(height: 20),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -299,6 +296,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       final dia =
                           DateFormat('dd \'de\' MMMM \'de\' yyyy', 'pt_BR')
                               .format(timestamp.toDate());
+                      final email =
+                          registro['email']; // Recupera o email do registro
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -318,7 +317,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             ),
                             subtitle: Center(
                               child: Text(
-                                dia,
+                                '$dia\n$email', // Exibe a data e o email do usuário
                                 style:
                                     const TextStyle(color: Color(0xFFF4F4F4)),
                               ),
@@ -330,7 +329,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   );
                 },
               ),
-            )
+            ),
           ],
         ),
       ),
