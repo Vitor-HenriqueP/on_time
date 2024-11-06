@@ -220,26 +220,27 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             const SizedBox(height: 20),
-        ElevatedButton(
-  style: ElevatedButton.styleFrom(
-    backgroundColor: const Color(0xFFFF8A50),
-    padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-  ),
-  onPressed: () async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      await FirebaseFirestore.instance.collection('ponto').add({
-        'hora': Timestamp.now(),
-        'email': user.email, // Salva o email do usuário no registro de ponto
-      });
-    }
-  },
-  child: const Text(
-    'Registrar',
-    style: TextStyle(color: Color(0xFFF4F4F4), fontSize: 18),
-  ),
-),
-
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFF8A50),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+              ),
+              onPressed: () async {
+                final user = FirebaseAuth.instance.currentUser;
+                if (user != null) {
+                  await FirebaseFirestore.instance.collection('ponto').add({
+                    'hora': Timestamp.now(),
+                    'email': user
+                        .email, // Salva o email do usuário no registro de ponto
+                  });
+                }
+              },
+              child: const Text(
+                'Registrar',
+                style: TextStyle(color: Color(0xFFF4F4F4), fontSize: 18),
+              ),
+            ),
             const SizedBox(height: 20),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -286,18 +287,32 @@ class _MyHomePageState extends State<MyHomePage> {
                   }
 
                   final registros = snapshot.data!.docs;
+                  final filteredRegistros = registros.where((registro) {
+                    final email = registro['email'];
+                    return email ==
+                        userEmail; // Filtra os registros com e-mail igual ao do usuário logado
+                  }).toList(); // Cria uma lista com os registros filtrados
+
+                  if (filteredRegistros.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        'Nenhum registro encontrado para o usuário logado.',
+                        style: TextStyle(color: Color(0xFFF4F4F4)),
+                      ),
+                    );
+                  }
+
                   return ListView.builder(
-                    itemCount: registros.length,
+                    itemCount: filteredRegistros.length,
                     itemBuilder: (context, index) {
-                      final registro = registros[index];
+                      final registro = filteredRegistros[index];
                       final timestamp = registro['hora'] as Timestamp;
                       final hora =
                           DateFormat('HH:mm').format(timestamp.toDate());
                       final dia =
                           DateFormat('dd \'de\' MMMM \'de\' yyyy', 'pt_BR')
                               .format(timestamp.toDate());
-                      final email =
-                          registro['email']; // Recupera o email do registro
+                      final email = registro['email'];
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -316,10 +331,15 @@ class _MyHomePageState extends State<MyHomePage> {
                               ),
                             ),
                             subtitle: Center(
-                              child: Text(
-                                '$dia\n$email', // Exibe a data e o email do usuário
-                                style:
-                                    const TextStyle(color: Color(0xFFF4F4F4)),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    '$dia\n$email', // Exibe a data e o email do usuário
+                                    style: const TextStyle(
+                                        color: Color(0xFFF4F4F4)),
+                                  ),
+                                 
+                                ],
                               ),
                             ),
                           ),
@@ -329,7 +349,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   );
                 },
               ),
-            ),
+            )
           ],
         ),
       ),
