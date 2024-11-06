@@ -6,6 +6,7 @@ import 'comprove.dart';
 import 'login.dart';
 import 'request_correction.dart';
 import 'requests_screens.dart';
+import 'registrationScreen.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -87,88 +88,98 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
       endDrawer: Drawer(
-        backgroundColor: const Color(0xFF433D3D),
-        child: ListView(
-          padding: EdgeInsets.zero,
+  backgroundColor: const Color(0xFF433D3D),
+  child: ListView(
+    padding: EdgeInsets.zero,
+    children: [
+      DrawerHeader(
+        decoration: const BoxDecoration(color: Color(0xFF433D3D)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            DrawerHeader(
-              decoration: const BoxDecoration(color: Color(0xFF433D3D)),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.of(context)
-                          .pop(); // Fecha o menu ao clicar no X
-                    },
-                    child: const CircleAvatar(
-                      backgroundColor: Color(0xFFFF8A50),
-                      radius: 24,
-                      child: Icon(Icons.close, color: Colors.white),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
+            GestureDetector(
+              onTap: () {
+                Navigator.of(context)
+                    .pop(); // Fecha o menu ao clicar no X
+              },
+              child: const CircleAvatar(
+                backgroundColor: Color(0xFFFF8A50),
+                radius: 24,
+                child: Icon(Icons.close, color: Colors.white),
               ),
             ),
-            ListTile(
-              title: const Text('Consultar Histórico',
-                  style: TextStyle(color: Color(0xFFF4F4F4))),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ComproveScreen()),
-                );
-              },
-            ),
-            ListTile(
-              title: const Text('Solicitar Correção',
-                  style: TextStyle(color: Color(0xFFF4F4F4))),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => CorrectionScreen()),
-                );
-              },
-            ),
-            if (hasRequests) // Condição para exibir "Minhas Solicitações"
-              ListTile(
-                title: const Text('Minhas Solicitações',
-                    style: TextStyle(color: Color(0xFFF4F4F4))),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const MyRequestsScreen()),
-                  );
-                },
-              ),
-            ListTile(
-              title: const Text('Logout',
-                  style: TextStyle(color: Color(0xFFF4F4F4))),
-              leading: const Icon(Icons.exit_to_app, color: Color(0xFFFF8A50)),
-              onTap: () async {
-                try {
-                  await FirebaseAuth.instance.signOut(); // Realiza o logout
-                  Navigator.of(context).pop(); // Fecha o menu
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            LoginScreen()), // Redireciona para o login
-                  );
-                } catch (e) {
-                  print(
-                      'Erro ao fazer logout: $e'); // Exibe o erro, caso algo tenha dado errado
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Erro ao realizar logout')),
-                  );
-                }
-              },
-            )
+            const SizedBox(height: 16),
           ],
         ),
       ),
+      ListTile(
+        title: const Text(
+          'Cadastrar Usuário',
+          style: TextStyle(color: Color(0xFFF4F4F4)),
+        ),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => RegisterScreen()),
+          );
+        },
+      ),
+      ListTile(
+        title: const Text('Consultar Histórico',
+            style: TextStyle(color: Color(0xFFF4F4F4))),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ComproveScreen()),
+          );
+        },
+      ),
+      ListTile(
+        title: const Text('Solicitar Correção',
+            style: TextStyle(color: Color(0xFFF4F4F4))),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => CorrectionScreen()),
+          );
+        },
+      ),
+      if (hasRequests) // Condição para exibir "Minhas Solicitações"
+        ListTile(
+          title: const Text('Minhas Solicitações',
+              style: TextStyle(color: Color(0xFFF4F4F4))),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const MyRequestsScreen()),
+            );
+          },
+        ),
+      ListTile(
+        title: const Text('Logout',
+            style: TextStyle(color: Color(0xFFF4F4F4))),
+        leading: const Icon(Icons.exit_to_app, color: Color(0xFFFF8A50)),
+        onTap: () async {
+          try {
+            await FirebaseAuth.instance.signOut(); // Realiza o logout
+            Navigator.of(context).pop(); // Fecha o menu
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => LoginScreen()),
+            );
+          } catch (e) {
+            print('Erro ao fazer logout: $e');
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Erro ao realizar logout')),
+            );
+          }
+        },
+      ),
+    ],
+  ),
+),
+
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
