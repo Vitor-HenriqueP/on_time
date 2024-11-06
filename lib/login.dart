@@ -15,7 +15,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController passwordController = TextEditingController();
   bool isLoading = false;
   String? errorMessage;
-  bool isMatriculaLogin = false; // Controle do switch entre Matrícula e Email/Senha
+  bool isEmailLogin = false; // Controle do switch entre Email e Matrícula
 
   // Função para fazer login com email e senha
   Future<void> signInWithEmail() async {
@@ -111,22 +111,22 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 32),
 
-              // Row para o switch e o texto "Login com Matrícula"
+              // Row para o switch e o texto "Login com Email"
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   const Text(
-                    'Login com Matrícula',
+                    'Login com Email',
                     style: TextStyle(
                       color: Color(0xFFF4F4F4),
                       fontSize: 16,
                     ),
                   ),
                   Switch(
-                    value: isMatriculaLogin,
+                    value: isEmailLogin, // Usando isEmailLogin para controlar a lógica
                     onChanged: (value) {
                       setState(() {
-                        isMatriculaLogin = value;
+                        isEmailLogin = value; // Quando o switch estiver ativo, será login por email
                       });
                     },
                     activeColor: const Color(0xFFFF8A50),
@@ -135,35 +135,8 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Mostrar campo de matrícula se o switch estiver ativado
-              if (isMatriculaLogin) ...[
-                // Campo de Matrícula
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: const Text(
-                    'Matrícula',
-                    style: TextStyle(
-                      color: Color(0xFFF4F4F4),
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: matriculaController,
-                  style: const TextStyle(color: Colors.black),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                  ),
-                  keyboardType: TextInputType.number,
-                ),
-              ],
-              // Caso contrário, mostrar campos de E-mail e Senha
-              if (!isMatriculaLogin) ...[
+              // Mostrar campo de e-mail e senha se o switch estiver ativado (login com email)
+              if (isEmailLogin) ...[ // Login com email
                 // Campo de E-mail
                 Align(
                   alignment: Alignment.centerLeft,
@@ -214,6 +187,33 @@ class _LoginScreenState extends State<LoginScreen> {
                   obscureText: true,
                 ),
               ],
+              // Caso contrário, mostrar campos de matrícula (login com matrícula)
+              if (!isEmailLogin) ...[ // Login com matrícula
+                // Campo de Matrícula
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: const Text(
+                    'Matrícula',
+                    style: TextStyle(
+                      color: Color(0xFFF4F4F4),
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: matriculaController,
+                  style: const TextStyle(color: Colors.black),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+              ],
               const SizedBox(height: 16),
               if (errorMessage != null)
                 Text(
@@ -228,7 +228,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   : Column(
                       children: [
                         // Botão de login com matrícula
-                        if (isMatriculaLogin) ...[
+                        if (!isEmailLogin) ...[
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFFFF8A50),
@@ -248,7 +248,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ],
                         // Botão de login com email e senha
-                        if (!isMatriculaLogin) ...[
+                        if (isEmailLogin) ...[
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFFFF8A50),

@@ -75,8 +75,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Cadastro de Usuário")),
-      body: Padding(
+      appBar: AppBar(
+        title: Text("Cadastro de Usuário", style: TextStyle(color: Colors.white)), // Cor da fonte do AppBar
+        backgroundColor: Color(0xFFFF8A50), // Cor do AppBar
+      ),
+      body: Container(
+        color: Color(0xFF433D3D), // Cor de fundo do corpo da tela
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -84,19 +88,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
             // Campo de CPF
             TextField(
               controller: _cpfController,
-              decoration: InputDecoration(labelText: 'CPF'),
+              decoration: InputDecoration(
+                labelText: 'CPF',
+                labelStyle: TextStyle(color: Color(0xFFFF8A50)), // Cor do texto da label
+                border: OutlineInputBorder(),
+              ),
               keyboardType: TextInputType.number,
+              style: TextStyle(color: Colors.white), // Cor do texto do campo
             ),
+            SizedBox(height: 10),
             // Campo de Nome
             TextField(
               controller: _nameController,
-              decoration: InputDecoration(labelText: 'Nome'),
+              decoration: InputDecoration(
+                labelText: 'Nome',
+                labelStyle: TextStyle(color: Color(0xFFFF8A50)), // Cor do texto da label
+                border: OutlineInputBorder(),
+              ),
+              style: TextStyle(color: Colors.white), // Cor do texto do campo
             ),
             SizedBox(height: 20),
             // Botão de Registro
             ElevatedButton(
               onPressed: registerUser,
-              child: Text('Registrar'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFFFF8A50), // Cor de fundo do botão
+              ),
+              child: Text(
+                'Registrar',
+                style: TextStyle(color: Colors.white), // Cor do texto do botão
+              ),
             ),
             SizedBox(height: 20),
             // Lista de Usuários Cadastrados
@@ -105,11 +126,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 stream: getUsers(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
+                    return Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFF8A50)))); // Cor do indicador de carregamento
                   }
 
                   if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return Center(child: Text('Nenhum usuário registrado.'));
+                    return Center(child: Text('Nenhum usuário registrado.', style: TextStyle(color: Colors.white))); // Cor do texto
                   }
 
                   var users = snapshot.data!.docs;
@@ -118,9 +139,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     itemBuilder: (context, index) {
                       var user = users[index];
                       return ListTile(
-                        title: Text(user['name']),
-                        subtitle: Text('CPF: ${user['cpf']}'),
-                        trailing: Text('Matrícula: ${user['matricula']}'),
+                        title: Text(user['name'], style: TextStyle(color: Colors.white)), // Cor do nome do usuário
+                        subtitle: Text('CPF: ${user['cpf']}', style: TextStyle(color: Colors.white)), // Cor do CPF
+                        trailing: Text('Matrícula: ${user['matricula']}', style: TextStyle(color: Colors.white)), // Cor da matrícula
                       );
                     },
                   );
