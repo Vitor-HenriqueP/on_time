@@ -287,11 +287,13 @@ class _MyHomePageState extends State<MyHomePage> {
                   }
 
                   final registros = snapshot.data!.docs;
-                  final filteredRegistros = registros.where((registro) {
-                    final email = registro['email'];
-                    return email ==
-                        userEmail; // Filtra os registros com e-mail igual ao do usuário logado
-                  }).toList(); // Cria uma lista com os registros filtrados
+                  final filteredRegistros = userEmail == 'teste@teste.com.br'
+                      ? registros // Se o e-mail for teste@teste.com.br, mostra todos os registros
+                      : registros.where((registro) {
+                          final email = registro['email'];
+                          return email ==
+                              userEmail; // Filtra pelo e-mail do usuário logado
+                        }).toList(); // Cria uma lista com os registros filtrados
 
                   if (filteredRegistros.isEmpty) {
                     return const Center(
@@ -338,7 +340,6 @@ class _MyHomePageState extends State<MyHomePage> {
                                     style: const TextStyle(
                                         color: Color(0xFFF4F4F4)),
                                   ),
-                                 
                                 ],
                               ),
                             ),
