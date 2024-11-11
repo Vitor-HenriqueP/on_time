@@ -234,32 +234,32 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF8A50),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+            // Condicional para esconder o botão de registrar ponto
+            if (userEmail != 'teste@teste.com.br')
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF8A50),
+                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                ),
+                onPressed: () async {
+                  final user = FirebaseAuth.instance.currentUser;
+                  if (user != null) {
+                    await FirebaseFirestore.instance.collection('ponto').add({
+                      'hora': Timestamp.now(),
+                      'email': user.email,
+                    });
+                  }
+                },
+                child: const Text(
+                  'Registrar',
+                  style: TextStyle(color: Color(0xFFF4F4F4), fontSize: 18),
+                ),
               ),
-              onPressed: () async {
-                final user = FirebaseAuth.instance.currentUser;
-                if (user != null) {
-                  await FirebaseFirestore.instance.collection('ponto').add({
-                    'hora': Timestamp.now(),
-                    'email': user.email,
-                  });
-                }
-              },
-              child: const Text(
-                'Registrar',
-                style: TextStyle(color: Color(0xFFF4F4F4), fontSize: 18),
-              ),
-            ),
             const SizedBox(height: 20),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFFF8A50),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
               ),
               onPressed: () {
                 Navigator.push(
@@ -268,7 +268,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 );
               },
               child: const Text(
-                'Meus registros',
+                'Registros de ponto',
                 style: TextStyle(color: Color(0xFFF4F4F4), fontSize: 18),
               ),
             ),
@@ -329,7 +329,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           style: const TextStyle(color: Color(0xFFF4F4F4)),
                         ),
                         subtitle: Text(
-                          'Data: ${DateFormat('dd/MM/yyyy').format(hora)}\nUsuário: $email',
+                          'Email: $email',
                           style: const TextStyle(color: Color(0xFFF4F4F4)),
                         ),
                       );
