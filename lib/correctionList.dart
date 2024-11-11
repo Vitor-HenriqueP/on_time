@@ -34,7 +34,9 @@ class CorrectionListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[900], // Cor de fundo da tela
       appBar: AppBar(
+        backgroundColor: Colors.orange, // Cor do AppBar
         title: const Text('Solicitações de Correção'),
       ),
       body: StreamBuilder<QuerySnapshot>(
@@ -61,13 +63,14 @@ class CorrectionListScreen extends StatelessWidget {
               final status = data.containsKey('status') ? data['status'] : null;
 
               return ListTile(
-                title: Text('Solicitação de correção: $email'),
+                tileColor: Colors.grey[850], // Cor do item na lista
+                title: Text('Solicitação de correção: $email', style: TextStyle(color: Colors.white)),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Data: $date'),
-                    Text('Hora: $time'),
-                    if (status != null) Text('Status: $status'),
+                    Text('Data: $date', style: TextStyle(color: Colors.white70)),
+                    Text('Hora: $time', style: TextStyle(color: Colors.white70)),
+                    if (status != null) Text('Status: $status', style: TextStyle(color: Colors.white70)),
                   ],
                 ),
                 trailing: Row(

@@ -12,8 +12,13 @@ class PontoScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Registros de Ponto'),
+        backgroundColor: Colors.grey[900],  // Cor de fundo da AppBar
+        title: const Text(
+          'Registros de Ponto',
+          style: TextStyle(color: Colors.orange),  // Cor do título da AppBar
+        ),
       ),
+      backgroundColor: Colors.grey[900],  // Cor de fundo da tela
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('ponto')
@@ -29,7 +34,7 @@ class PontoScreen extends StatelessWidget {
             return const Center(
               child: Text(
                 'Nenhum registro encontrado.',
-                style: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
+                style: TextStyle(color: Colors.orange),  // Cor do texto
               ),
             );
           }
@@ -47,7 +52,7 @@ class PontoScreen extends StatelessWidget {
             return const Center(
               child: Text(
                 'Nenhum registro encontrado para o usuário logado.',
-                style: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
+                style: TextStyle(color: Colors.orange),  // Cor do texto
               ),
             );
           }
@@ -62,11 +67,11 @@ class PontoScreen extends StatelessWidget {
               return ListTile(
                 title: Text(
                   'Hora: ${DateFormat('HH:mm:ss').format(hora)}',
-                  style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
+                  style: const TextStyle(color: Colors.orange),  // Cor do texto
                 ),
                 subtitle: Text(
                   'Data: ${DateFormat('dd/MM/yyyy').format(hora)}\nUsuário: $email',
-                  style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
+                  style: const TextStyle(color: Colors.orange),  // Cor do texto
                 ),
                 onTap: () {
                   // Navega para a tela de detalhes com o registro selecionado

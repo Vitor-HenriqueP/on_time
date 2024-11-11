@@ -75,8 +75,13 @@ class _DetalhePontoScreenState extends State<DetalhePontoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Detalhes do Registro de Ponto'),
+        backgroundColor: Colors.grey[900],  // Cor de fundo da AppBar
+        title: const Text(
+          'Detalhes do Registro de Ponto',
+          style: TextStyle(color: Colors.orange),  // Cor do título da AppBar
+        ),
       ),
+      backgroundColor: Colors.grey[900],  // Cor de fundo da tela
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -84,31 +89,40 @@ class _DetalhePontoScreenState extends State<DetalhePontoScreen> {
           children: [
             Text(
               'Hora: ${DateFormat('HH:mm:ss').format(_selectedDate)}',
-              style: const TextStyle(fontSize: 18, color: Colors.black),
+              style: const TextStyle(fontSize: 18, color: Colors.orange),  // Cor do texto
             ),
             const SizedBox(height: 8),
             Text(
               'Data: ${DateFormat('dd/MM/yyyy').format(_selectedDate)}',
-              style: const TextStyle(fontSize: 18, color: Colors.black),
+              style: const TextStyle(fontSize: 18, color: Colors.orange),  // Cor do texto
             ),
             const SizedBox(height: 8),
             Text(
               'Usuário: ${widget.registro['email']}',
-              style: const TextStyle(fontSize: 18, color: Colors.black),
+              style: const TextStyle(fontSize: 18, color: Colors.orange),  // Cor do texto
             ),
             const SizedBox(height: 16),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,  // Cor de fundo dos botões
+              ),
               onPressed: _pickDate,
-              child: const Text('Editar Data'),
+              child: const Text('Editar Data', style: TextStyle(color: Colors.black)),  // Cor do texto do botão
             ),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,  // Cor de fundo dos botões
+              ),
               onPressed: _pickTime,
-              child: const Text('Editar Hora'),
+              child: const Text('Editar Hora', style: TextStyle(color: Colors.black)),  // Cor do texto do botão
             ),
             const SizedBox(height: 16),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,  // Cor de fundo dos botões
+              ),
               onPressed: _saveChanges,
-              child: const Text('Salvar Alterações'),
+              child: const Text('Salvar Alterações', style: TextStyle(color: Colors.black)),  // Cor do texto do botão
             ),
           ],
         ),
