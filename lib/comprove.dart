@@ -180,7 +180,6 @@ class ComproveScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.grey[900],
-        title: const Text('Olá, Vitor!'),
         actions: [
           IconButton(
             icon: const Icon(Icons.menu),
@@ -281,29 +280,32 @@ class ComproveScreen extends StatelessWidget {
                                     color: Color(0xFFFF8A50),
                                   ),
                                   title: Center(
-                                    child: Text(
-                                      hora,
-                                      style: const TextStyle(
-                                          color: Color(0xFFF4F4F4)),
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          '$hora - $dia',
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white),
+                                        ),
+                                        Text(
+                                          'Email: $email',
+                                          style: const TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.white),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  subtitle: Center(
-                                    child: Text(
-                                      dia,
-                                      style: const TextStyle(
-                                          color: Color(0xFFF4F4F4)),
+                                  trailing: IconButton(
+                                    icon: const Icon(
+                                      Icons.download,
+                                      color: Colors.orange,
                                     ),
-                                  ),
-                                  trailing: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      IconButton(
-                                        icon: const Icon(Icons.visibility,
-                                            color: Colors.orange),
-                                        onPressed: () => _showRegistroDialog(
-                                            context, registro),
-                                      ),
-                                    ],
+                                    onPressed: () {
+                                      _showRegistroDialog(
+                                          context, registro);
+                                    },
                                   ),
                                 ),
                               ),
