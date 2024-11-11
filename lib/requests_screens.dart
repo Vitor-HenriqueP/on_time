@@ -51,6 +51,9 @@ class MyRequestsScreen extends StatelessWidget {
               final request = requests[index];
               final motivo = request['reason'] ?? 'Motivo não informado';
 
+              // Obtendo o status da solicitação
+              final status = request['status'] ?? 'Status não informado';
+
               // Verifica o tipo do campo 'data' e converte se necessário
               DateTime dataHora;
               if (request['date'] is Timestamp) {
@@ -69,9 +72,18 @@ class MyRequestsScreen extends StatelessWidget {
                   motivo,
                   style: const TextStyle(color: Color(0xFFF4F4F4)),
                 ),
-                subtitle: Text(
-                  '$dataFormatada às $horaFormatada',
-                  style: const TextStyle(color: Color(0xFFF4F4F4)),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$dataFormatada às $horaFormatada',
+                      style: const TextStyle(color: Color(0xFFF4F4F4)),
+                    ),
+                    Text(
+                      'Status: $status',
+                      style: const TextStyle(color: Color(0xFFF4F4F4), fontStyle: FontStyle.italic),
+                    ),
+                  ],
                 ),
                 leading: const Icon(Icons.access_time, color: Color(0xFFFF8A50)),
                 trailing: IconButton(

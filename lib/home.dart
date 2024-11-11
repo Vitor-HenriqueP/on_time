@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_final/correctionList.dart';
 import 'package:intl/intl.dart';
 import 'comprove.dart';
 import 'login.dart';
 import 'request_correction.dart';
 import 'requests_screens.dart';
+
 import 'registrationScreen.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -41,7 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('corrections')
           .where('email', isEqualTo: user.email)
-          .limit(1) // Limitando a 1 para otimizar a consulta
+          .limit(1)
           .get();
 
       setState(() {
@@ -73,8 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
               return IconButton(
                 icon: const Icon(Icons.menu, color: Color(0xFFFF8A50)),
                 onPressed: () {
-                  Scaffold.of(context)
-                      .openEndDrawer(); // Abre o menu corretamente
+                  Scaffold.of(context).openEndDrawer();
                 },
               );
             },
@@ -93,8 +94,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      Navigator.of(context)
-                          .pop(); // Fecha o menu ao clicar no X
+                      Navigator.of(context).pop();
                     },
                     child: const CircleAvatar(
                       backgroundColor: Color(0xFFFF8A50),
@@ -106,58 +106,72 @@ class _MyHomePageState extends State<MyHomePage> {
                 ],
               ),
             ),
-            ListTile(
-              title: const Text(
-                'Cadastrar Usuário',
-                style: TextStyle(color: Color(0xFFF4F4F4)),
-              ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => RegisterScreen()),
-                );
-              },
-            ),
-            ListTile(
-              title: const Text('Consultar Histórico',
-                  style: TextStyle(color: Color(0xFFF4F4F4))),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ComproveScreen()),
-                );
-              },
-            ),
-            ListTile(
-              title: const Text('Solicitar Correção',
-                  style: TextStyle(color: Color(0xFFF4F4F4))),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => CorrectionScreen()),
-                );
-              },
-            ),
-            if (hasRequests) // Condição para exibir "Minhas Solicitações"
+            if (userEmail == 'teste@teste.com.br')
               ListTile(
-                title: const Text('Minhas Solicitações',
-                    style: TextStyle(color: Color(0xFFF4F4F4))),
+                title: const Text(
+                  'Cadastrar Usuário',
+                  style: TextStyle(color: Color(0xFFF4F4F4)),
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => RegisterScreen()),
+                  );
+                },
+              ),
+            if (userEmail == 'teste@teste.com.br')
+              ListTile(
+                title: const Text(
+                  'Solicitações de Correção',
+                  style: TextStyle(color: Color(0xFFF4F4F4)),
+                ),
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const MyRequestsScreen()),
+                        builder: (context) => CorrectionListScreen()),
                   );
                 },
               ),
+            if (userEmail != 'teste@teste.com.br') ...[
+              ListTile(
+                title: const Text(
+                  'Solicitar Correção',
+                  style: TextStyle(color: Color(0xFFF4F4F4)),
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => CorrectionScreen()),
+                  );
+                },
+              ),
+              if (hasRequests)
+                ListTile(
+                  title: const Text(
+                    'Minhas Solicitações',
+                    style: TextStyle(color: Color(0xFFF4F4F4)),
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const MyRequestsScreen()),
+                    );
+                  },
+                ),
+            ],
             ListTile(
-              title: const Text('Logout',
-                  style: TextStyle(color: Color(0xFFF4F4F4))),
+              title: const Text(
+                'Logout',
+                style: TextStyle(color: Color(0xFFF4F4F4)),
+              ),
               leading: const Icon(Icons.exit_to_app, color: Color(0xFFFF8A50)),
               onTap: () async {
                 try {
-                  await FirebaseAuth.instance.signOut(); // Realiza o logout
-                  Navigator.of(context).pop(); // Fecha o menu
+                  await FirebaseAuth.instance.signOut();
+                  Navigator.of(context).pop();
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (context) => LoginScreen()),
@@ -231,8 +245,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 if (user != null) {
                   await FirebaseFirestore.instance.collection('ponto').add({
                     'hora': Timestamp.now(),
-                    'email': user
-                        .email, // Salva o email do usuário no registro de ponto
+                    'email': user.email,
                   });
                 }
               },
@@ -288,12 +301,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
                   final registros = snapshot.data!.docs;
                   final filteredRegistros = userEmail == 'teste@teste.com.br'
-                      ? registros // Se o e-mail for teste@teste.com.br, mostra todos os registros
+                      ? registros
                       : registros.where((registro) {
                           final email = registro['email'];
-                          return email ==
-                              userEmail; // Filtra pelo e-mail do usuário logado
-                        }).toList(); // Cria uma lista com os registros filtrados
+                          return email == userEmail;
+                        }).toList();
 
                   if (filteredRegistros.isEmpty) {
                     return const Center(
@@ -308,49 +320,24 @@ class _MyHomePageState extends State<MyHomePage> {
                     itemCount: filteredRegistros.length,
                     itemBuilder: (context, index) {
                       final registro = filteredRegistros[index];
-                      final timestamp = registro['hora'] as Timestamp;
-                      final hora =
-                          DateFormat('HH:mm').format(timestamp.toDate());
-                      final dia =
-                          DateFormat('dd \'de\' MMMM \'de\' yyyy', 'pt_BR')
-                              .format(timestamp.toDate());
+                      final hora = (registro['hora'] as Timestamp).toDate();
                       final email = registro['email'];
 
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Card(
-                          color: const Color(0xFF433D3D),
-                          child: ListTile(
-                            leading: const Icon(
-                              Icons.access_time,
-                              color: Color(0xFFFF8A50),
-                            ),
-                            title: Center(
-                              child: Text(
-                                hora,
-                                style:
-                                    const TextStyle(color: Color(0xFFF4F4F4)),
-                              ),
-                            ),
-                            subtitle: Center(
-                              child: Column(
-                                children: [
-                                  Text(
-                                    '$dia\n$email', // Exibe a data e o email do usuário
-                                    style: const TextStyle(
-                                        color: Color(0xFFF4F4F4)),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
+                      return ListTile(
+                        title: Text(
+                          'Hora: ${DateFormat('HH:mm:ss').format(hora)}',
+                          style: const TextStyle(color: Color(0xFFF4F4F4)),
+                        ),
+                        subtitle: Text(
+                          'Data: ${DateFormat('dd/MM/yyyy').format(hora)}\nUsuário: $email',
+                          style: const TextStyle(color: Color(0xFFF4F4F4)),
                         ),
                       );
                     },
                   );
                 },
               ),
-            )
+            ),
           ],
         ),
       ),

@@ -27,45 +27,47 @@ class _CorrectionScreenState extends State<CorrectionScreen> {
     }
   }
 
-  Future<void> submitCorrection() async {
-    setState(() {
-      isLoading = true;
-    });
+ Future<void> submitCorrection() async {
+  setState(() {
+    isLoading = true;
+  });
 
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        await FirebaseFirestore.instance.collection('corrections').add({
-          'userId': user.uid,
-          'email': emailController.text,
-          'matricula': staticMatricula,
-          'date': selectedDate.toString(),
-          'time': selectedTime.format(context),
-          'reason': reasonController.text,
-          'submittedAt': Timestamp.now(),
-        });
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Correção enviada com sucesso!')),
-        );
-        
-        // Limpar os campos após o envio
-        reasonController.clear();
-        setState(() {
-          selectedDate = DateTime.now();
-          selectedTime = TimeOfDay.now();
-        });
-      }
-    } catch (e) {
+  try {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await FirebaseFirestore.instance.collection('corrections').add({
+        'userId': user.uid,
+        'email': emailController.text,
+        'matricula': staticMatricula,
+        'date': selectedDate.toString(),
+        'time': selectedTime.format(context),
+        'reason': reasonController.text,
+        'submittedAt': Timestamp.now(),
+        'status': 'pendente', // Adiciona o campo status com valor pendente
+      });
+      
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erro ao enviar correção. Tente novamente.')),
+        const SnackBar(content: Text('Correção enviada com sucesso!')),
       );
-    } finally {
+
+      // Limpar os campos após o envio
+      reasonController.clear();
       setState(() {
-        isLoading = false;
+        selectedDate = DateTime.now();
+        selectedTime = TimeOfDay.now();
       });
     }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Erro ao enviar correção. Tente novamente.')),
+    );
+  } finally {
+    setState(() {
+      isLoading = false;
+    });
   }
+}
+
 
   Future<void> selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
