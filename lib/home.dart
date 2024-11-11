@@ -17,15 +17,28 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMixin {
   String? userEmail;
   bool hasRequests = false;
+  late AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
     _loadUserEmail();
     _checkUserRequests();
+    
+    // Inicializa o controller de animação
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500), // Duração da animação
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose(); // Libera recursos do controller quando o widget é destruído
+    super.dispose();
   }
 
   Future<void> _loadUserEmail() async {
@@ -56,6 +69,29 @@ class _MyHomePageState extends State<MyHomePage> {
     while (true) {
       await Future.delayed(const Duration(seconds: 1));
       yield DateFormat('HH:mm:ss').format(DateTime.now());
+    }
+  }
+
+  // Stream para obter os últimos registros de ponto
+  Stream<List<Map<String, dynamic>>> getLastPontoRecords() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      return FirebaseFirestore.instance
+          .collection('ponto')
+          .where('email', isEqualTo: user.email)
+          .orderBy('hora', descending: true)
+          .limit(5) // Limita para os últimos 5 registros
+          .snapshots()
+          .map((snapshot) => snapshot.docs
+              .map((doc) => {
+                    'hora': DateFormat('HH:mm:ss').format(
+                        (doc['hora'] as Timestamp).toDate()),
+                    'data': DateFormat('dd/MM/yyyy').format(
+                        (doc['hora'] as Timestamp).toDate())
+                  })
+              .toList());
+    } else {
+      return Stream.value([]);
     }
   }
 
@@ -142,8 +178,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: (context) => CorrectionScreen()),
+                    MaterialPageRoute(builder: (context) => CorrectionScreen()),
                   );
                 },
               ),
@@ -239,9 +274,12 @@ class _MyHomePageState extends State<MyHomePage> {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFF8A50),
-                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 30, vertical: 15), // Diminui a largura
                 ),
                 onPressed: () async {
+                  // Anima o ícone (rotação de 180 graus)
+                  await _animationController.forward(from: 0);
                   final user = FirebaseAuth.instance.currentUser;
                   if (user != null) {
                     await FirebaseFirestore.instance.collection('ponto').add({
@@ -250,16 +288,37 @@ class _MyHomePageState extends State<MyHomePage> {
                     });
                   }
                 },
-                child: const Text(
-                  'Registrar',
-                  style: TextStyle(color: Color(0xFFF4F4F4), fontSize: 18),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    AnimatedBuilder(
+                      animation: _animationController,
+                      child: const Icon(
+                        Icons.access_time, // Ícone de relógio
+                        color: Color(0xFFF4F4F4),
+                      ),
+                      builder: (context, child) {
+                        return Transform.rotate(
+                          angle: _animationController.value * 2 * 3.14159, // Rotaciona o ícone
+                          child: child,
+                        );
+                      },
+                    ),
+                    SizedBox(width: 10), // Espaçamento entre o ícone e o texto
+                    const Text(
+                      'Registrar',
+                      style: TextStyle(color: Color(0xFFF4F4F4), fontSize: 18),
+                    ),
+                  ],
                 ),
               ),
-            const SizedBox(height: 20),
-            ElevatedButton(
+                  SizedBox(height: 20), // Espaço entre os botões
+
+ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFFF8A50),
-                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
               ),
               onPressed: () {
                 Navigator.push(
@@ -272,13 +331,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 style: TextStyle(color: Color(0xFFF4F4F4), fontSize: 18),
               ),
             ),
-            const SizedBox(height: 20),
-            const Text(
-              'Últimos registros',
-              style: TextStyle(fontSize: 20, color: Color(0xFFF4F4F4)),
-            ),
-            const SizedBox(height: 10),
-            Expanded(
+    
+            const SizedBox(height: 60),
+            // Exibe os últimos registros de ponto
+              Expanded(
               child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('ponto')
