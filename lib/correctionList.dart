@@ -17,6 +17,20 @@ class CorrectionListScreen extends StatelessWidget {
     }
   }
 
+  // Função para atualizar o status da solicitação para "recusada"
+  Future<void> _recusarCorrecao(BuildContext context, DocumentReference correctionRef) async {
+    try {
+      await correctionRef.update({'status': 'recusada'});
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Solicitação de correção recusada!')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao recusar a solicitação: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -95,6 +109,40 @@ class CorrectionListScreen extends StatelessWidget {
                                 TextButton(
                                   onPressed: () {
                                     _aceitarCorrecao(context, correctionRef);
+                                    Navigator.of(context).pop(); // Fechar o pop-up
+                                  },
+                                  child: const Text('Confirmar'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                    ),
+                    // Botão "Recusar" para recusar a correção
+                    IconButton(
+                      icon: const Icon(Icons.cancel, color: Colors.red),
+                      onPressed: () {
+                        // Exibindo o pop-up de confirmação
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text('Atenção'),
+                              content: const Text(
+                                  'Tem certeza que deseja recusar esta solicitação?'),
+                              actions: <Widget>[
+                                // Botão para fechar o pop-up
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text('Fechar'),
+                                ),
+                                // Botão de confirmação para recusar
+                                TextButton(
+                                  onPressed: () {
+                                    _recusarCorrecao(context, correctionRef);
                                     Navigator.of(context).pop(); // Fechar o pop-up
                                   },
                                   child: const Text('Confirmar'),
